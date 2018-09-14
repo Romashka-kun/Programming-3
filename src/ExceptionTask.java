@@ -1,3 +1,4 @@
+
 import java.util.Scanner;
 
 public class ExceptionTask {
@@ -20,7 +21,11 @@ public class ExceptionTask {
             throw new Exception("EvenException");
     }
 
-
+//    private static void smth(List<String> list) {
+//        for (int i = 0; i < list.size(); i++) {
+//
+//        }
+//    }
 
     public static void main(String[] args) {
 
@@ -36,6 +41,10 @@ public class ExceptionTask {
         int x = readInt("Введите x");
         int y = readInt("Введите y");
         System.out.println("x + y = " + (x + y));
+
+
+//        List<String> list = Arrays.asList("a.txt", "b.txt", "c.txt", "d.txt");
+
 
     }
 }
