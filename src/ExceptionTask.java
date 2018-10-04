@@ -34,12 +34,11 @@ public class ExceptionTask {
                 Path f1 = new File("./out/" + i + fName).toPath();
                 Files.move(f, f1, StandardCopyOption.REPLACE_EXISTING);
                 System.out.println("Файл " + fName + " успешно переименован");
+            } catch (DirectoryNotEmptyException e) {
+                System.out.println("Файл перемещен в непустую директорию");
             } catch (IOException e) {
                 System.out.println("Не удалось переименовать файл " + fName);
             }
-//            } catch (DirectoryNotEmptyException e) {
-//                System.out.println();
-//            }
         }
     }
 

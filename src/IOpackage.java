@@ -61,7 +61,7 @@ public class IOpackage {
     Прочитать текст из файла
     try (Reader in = new InputStreamReader(new FileInputStream("a.txt"), "UTF-8"))
 
-    Buffered: InputStream, OutputStream, Reader, Writer - обёрка для производительности + доп. возможности
+    Buffered: InputStream, OutputStream, Reader, Writer - обёртка для производительности + доп. возможности
     в BufferedWriter есть метод newLine() - перевод строки.
 
     try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream("a.txt"), "UTF-8")))
