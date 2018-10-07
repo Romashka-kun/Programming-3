@@ -30,8 +30,8 @@ public class ExceptionTask {
         for (int i = 0; i < list.size(); i++) {
             try {
                 fName = list.get(i);
-                Path f = new File("./out/" + fName).toPath();
-                Path f1 = new File("./out/" + i + fName).toPath();
+                Path f = new File("tests/" + fName).toPath();
+                Path f1 = new File("tests/" + i + fName).toPath();
                 Files.move(f, f1, StandardCopyOption.REPLACE_EXISTING);
                 System.out.println("Файл " + fName + " успешно переименован");
             } catch (DirectoryNotEmptyException e) {

@@ -1,11 +1,11 @@
 import java.io.*;
 import java.nio.file.Files;
-import java.util.Arrays;
+import java.nio.file.Paths;
 
 public class IOTask {
 
     private static void write(String text, String encoding) {
-        try (Writer out = new OutputStreamWriter(new FileOutputStream("./out/text_" + encoding + ".txt"), encoding)) {
+        try (Writer out = new OutputStreamWriter(new FileOutputStream("tests/text_" + encoding + ".txt"), encoding)) {
             out.write(text);
         } catch (IOException e) {
             System.out.println("Ошибка записи в файл: " + e);
@@ -13,19 +13,23 @@ public class IOTask {
     }
 
     private static void readFile(String encoding) {
-        try (FileOutputStream out = new FileOutputStream("./out/text_" + encoding + ".bin")) {
-            byte[] b = Files.readAllBytes(new File("./out/text_" + encoding + ".txt").toPath());
-            String str = Arrays.toString(b).replace(",", "").replace("[", "")
-                    .replace("]", "");
-            out.write(str.getBytes());
+        try (PrintStream out = new PrintStream("tests/text_" + encoding + ".bin")) {
+            byte[] b = Files.readAllBytes(Paths.get("tests", "text_" + encoding + ".txt"));
+            for (byte a : b) {
+                if (a < 0)
+                    out.print(String.valueOf(a + 256) + " ");
+                else
+                    out.print(String.valueOf(a) + " ");
+
+            }
         } catch (IOException e) {
             System.out.println("lalalal: " + e);
         }
     }
 
     private static void koi7r(String encoding) {
-        try (FileOutputStream out = new FileOutputStream("./out/text_koi7r.txt")) {
-            byte[] b = Files.readAllBytes(new File("./out/text_" + encoding + ".txt").toPath());
+        try (FileOutputStream out = new FileOutputStream("tests/text_koi7r.txt")) {
+            byte[] b = Files.readAllBytes(Paths.get("tests", "text_" + encoding + ".txt"));
             for (byte a : b) {
                 if (a < 0)
                     a += 128;
