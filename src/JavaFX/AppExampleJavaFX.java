@@ -59,7 +59,7 @@ public class AppExampleJavaFX extends Application {
         HBox.setHgrow(tf1, Priority.ALWAYS);
         HBox.setMargin(b1, new Insets(8));
 
-        //а это не constraint, это просто свойство нашего HBox, все элементы должны распологаться снизу по центру
+        //а это не constraint, это просто свойство нашего HBox, все элементы должны располагаться снизу по центру
         root.setAlignment(Pos.BOTTOM_CENTER);
 
         return root;
