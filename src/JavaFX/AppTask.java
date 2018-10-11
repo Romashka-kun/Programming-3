@@ -1,8 +1,6 @@
 package JavaFX;
 
 import javafx.application.Application;
-import javafx.geometry.HPos;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -12,7 +10,7 @@ import javafx.stage.Stage;
 public class AppTask extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         primaryStage.setTitle("Chat");
         Parent root = initInterface();
         primaryStage.setScene(new Scene(root));
