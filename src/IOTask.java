@@ -15,13 +15,14 @@ public class IOTask {
     private static void readFile(String encoding) {
         try (PrintStream out = new PrintStream("tests/text_" + encoding + ".bin")) {
             byte[] b = Files.readAllBytes(Paths.get("tests", "text_" + encoding + ".txt"));
-            for (byte a : b) {
-                if (a < 0)
-                    out.print(String.valueOf(a + 256) + " ");
-                else
-                    out.print(String.valueOf(a) + " ");
-
-            }
+            for (byte a : b)
+//                if (a < 0)
+//                    out.print(String.valueOf(a + 256) + " ");
+//                else
+//                    out.print(String.valueOf(a) + " ");
+                out.print(a < 0 ? a + 256 + " " : a + " ");
+//                out.print(a&0xFF);
+//                out.print(Integer.toString(a, 16) + " ");
         } catch (IOException e) {
             System.out.println("lalalal: " + e);
         }
