@@ -1,6 +1,7 @@
 package JavaFX;
 
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -9,21 +10,34 @@ import javafx.stage.Stage;
 
 public class AppTask extends Application {
 
+    private Button b1;
+    private TextArea ta;
+    private TextField tf;
+
+
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Chat");
         Parent root = initInterface();
         primaryStage.setScene(new Scene(root));
+        initInteraction();
         primaryStage.show();
 
+    }
+
+    private void initInteraction() {
+        b1.addEventHandler(
+                ActionEvent.ACTION,
+                a -> ta.appendText(tf.getText() + "\n")
+        );
     }
 
     private Parent initInterface() {
         HBox root = new HBox();
 
-        TextArea ta = new TextArea();
-        TextField tf = new TextField();
-        Button b1 = new Button("Send");
+        ta = new TextArea();
+        tf = new TextField();
+        b1 = new Button("Send");
         HBox hb1 = new HBox(tf, b1);
         VBox vb1 = new VBox(ta, hb1);
 
