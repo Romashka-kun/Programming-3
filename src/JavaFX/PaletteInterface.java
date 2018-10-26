@@ -1,12 +1,16 @@
 package JavaFX;
 
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
@@ -36,17 +40,22 @@ public class PaletteInterface extends Application {
 
     private void initInteraction() {
 
-        circleColor.setOnAction(
-                prop -> circle.setFill(circleColor.getValue())
+        circle.fillProperty().bind(
+                circleColor.valueProperty()
         );
 
         circle.radiusProperty().bind(
                 radiusSlider.valueProperty()
         );
 
-        backgroundColor.setOnAction(
-                prop -> rightPane.setStyle("-fx-background-color: #" + Integer.toHexString(
-                        backgroundColor.getValue().hashCode()))
+        rightPane.backgroundProperty().bind(
+                Bindings.createObjectBinding(
+                        () -> new Background(
+                                new BackgroundFill(
+                                        backgroundColor.getValue(), CornerRadii.EMPTY, Insets.EMPTY
+                                )
+                        ), backgroundColor.valueProperty()
+                )
         );
 
         rightPane.widthProperty().addListener(
@@ -55,6 +64,10 @@ public class PaletteInterface extends Application {
 
         rightPane.heightProperty().addListener(
                 prop -> circle.setCenterY(rightPane.getHeight() / 2)
+        );
+
+        radiusSlider.valueProperty().addListener(
+                prop -> radiusSlider.setMax(rightPane.getHeight() / 2)
         );
     }
 
@@ -66,8 +79,8 @@ public class PaletteInterface extends Application {
         rightPane = new Pane(circle);
 
         leftPane.setPrefWidth(300);
-        rightPane.setStyle("-fx-background-color: #" + Integer.toHexString(
-                backgroundColor.getValue().hashCode()));
+        rightPane.setPrefSize(300, 300);
+        circleColor.setValue(Color.BLACK);
 
         HBox.setHgrow(rightPane, Priority.ALWAYS);
         VBox.setVgrow(rightPane, Priority.ALWAYS);
