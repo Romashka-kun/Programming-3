@@ -58,16 +58,27 @@ public class PaletteInterface extends Application {
                 )
         );
 
-        rightPane.widthProperty().addListener(
-                prop -> circle.setCenterX(rightPane.getWidth() / 2)
+        circle.centerXProperty().bind(
+                Bindings.createDoubleBinding(
+                        () -> rightPane.getWidth() / 2,
+                        rightPane.widthProperty()
+                )
         );
 
-        rightPane.heightProperty().addListener(
-                prop -> circle.setCenterY(rightPane.getHeight() / 2)
+        circle.centerYProperty().bind(
+                Bindings.createDoubleBinding(
+                        () -> rightPane.getHeight() / 2,
+                        rightPane.heightProperty()
+                )
         );
 
-        radiusSlider.valueProperty().addListener(
-                prop -> radiusSlider.setMax(rightPane.getHeight() / 2)
+        radiusSlider.maxProperty().bind(
+                Bindings.createDoubleBinding(
+                        () -> rightPane.getHeight() <= rightPane.getWidth() ?
+                                rightPane.getHeight() / 2 : rightPane.getWidth() / 2,
+                        rightPane.heightProperty(),
+                        rightPane.widthProperty()
+                )
         );
     }
 

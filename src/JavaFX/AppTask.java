@@ -2,6 +2,7 @@ package JavaFX;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -10,9 +11,9 @@ import javafx.stage.Stage;
 
 public class AppTask extends Application {
 
-    private Button b1;
-    private TextArea ta;
-    private TextField tf;
+    private Button button;
+    private TextArea textArea;
+    private TextField textField;
 
 
     @Override
@@ -26,20 +27,31 @@ public class AppTask extends Application {
     }
 
     private void initInteraction() {
-        b1.addEventHandler(
-                ActionEvent.ACTION,
-                a -> ta.appendText(tf.getText() + "\n")
-        );
+        textField.requestFocus();
+
+        EventHandler<ActionEvent> sendAction = prop -> {
+            String text = textField.getText();
+
+            if (text.trim().isEmpty())
+                return;
+
+            textArea.appendText(text + "\n");
+            textField.clear();
+            textField.requestFocus();
+        };
+
+        button.setOnAction(sendAction);
+        textField.setOnAction(sendAction);
     }
 
     private Parent initInterface() {
         HBox root = new HBox();
 
-        ta = new TextArea();
-        tf = new TextField();
-        b1 = new Button("Send");
-        HBox hb1 = new HBox(tf, b1);
-        VBox vb1 = new VBox(ta, hb1);
+        textArea = new TextArea();
+        textField = new TextField();
+        button = new Button("Send");
+        HBox hb1 = new HBox(textField, button);
+        VBox vb1 = new VBox(textArea, hb1);
 
         Label l1 = new Label("Contacts");
         ListView lv1 = new ListView();
@@ -48,11 +60,13 @@ public class AppTask extends Application {
 
         root.getChildren().addAll(vb1, vb2);
 
-        HBox.setHgrow(tf, Priority.ALWAYS);
-        HBox.setHgrow(ta, Priority.ALWAYS);
+        textArea.setEditable(false);
+
+        HBox.setHgrow(textField, Priority.ALWAYS);
+        HBox.setHgrow(textArea, Priority.ALWAYS);
         HBox.setHgrow(vb1, Priority.ALWAYS);
 
-        VBox.setVgrow(ta, Priority.ALWAYS);
+        VBox.setVgrow(textArea, Priority.ALWAYS);
         VBox.setVgrow(lv1, Priority.ALWAYS);
 
         vb2.setMaxWidth(Region.USE_PREF_SIZE);
