@@ -21,13 +21,15 @@ public class PaletteInterface extends Application {
     private Label radiusLabel = new Label("Radius of circle");
     private Label circleLabel = new Label("Choose circle color");
     private Label backgroundLabel = new Label("Choose background color");
-    private Circle circle = new Circle(100);
+    private Circle circle = new Circle();
     private Pane rightPane;
 
 
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Color Palette");
+        primaryStage.setMinWidth(300);
+        primaryStage.setMinHeight(300);
 
         Parent root = initInterface();
         primaryStage.setScene(new Scene(root));
@@ -35,6 +37,8 @@ public class PaletteInterface extends Application {
         initInteraction(); //в этом методе будет описываться поведение элементов интерфейса
 
         primaryStage.show();
+
+        radiusSlider.setValue((radiusSlider.getMin() + radiusSlider.getMax()) / 2);
     }
 
     private void initInteraction() {
@@ -65,10 +69,7 @@ public class PaletteInterface extends Application {
         );
 
         circle.centerYProperty().bind(
-                Bindings.createDoubleBinding(
-                        () -> rightPane.getHeight() / 2,
-                        rightPane.heightProperty()
-                )
+                Bindings.divide(rightPane.heightProperty(), 2)
         );
 
         radiusSlider.maxProperty().bind(
@@ -84,6 +85,10 @@ public class PaletteInterface extends Application {
     private Parent initInterface() {
         HBox root = new HBox();
 
+        radiusSlider.setMajorTickUnit(50);
+        radiusSlider.setMinorTickCount(5);
+        radiusSlider.setShowTickMarks(true);
+        radiusSlider.setShowTickLabels(true);
 
         VBox leftPane = new VBox(radiusLabel, radiusSlider, circleLabel, circleColor, backgroundLabel, backgroundColor);
         rightPane = new Pane(circle);
@@ -95,9 +100,7 @@ public class PaletteInterface extends Application {
         HBox.setHgrow(rightPane, Priority.ALWAYS);
         VBox.setVgrow(rightPane, Priority.ALWAYS);
 
-        radiusSlider.setValue(50);
         root.getChildren().addAll(leftPane, rightPane);
-
 
         return root;
     }
