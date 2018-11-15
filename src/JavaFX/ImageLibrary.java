@@ -9,11 +9,14 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 public class ImageLibrary extends Application {
 
@@ -22,7 +25,7 @@ public class ImageLibrary extends Application {
     private DirectoryChooser directoryChooser;
     private Button browse;
     private TextField pathToDirectory;
-    private File directory;
+    private Label label;
 
     @Override
     public void start(Stage primaryStage) {
@@ -38,24 +41,34 @@ public class ImageLibrary extends Application {
 
     private void initData() {
         ObservableList<File> images = FXCollections.observableArrayList();
-        for (File f : directory.listFiles())
-            images.add(new File(f.getPath()));
+        for (File f : directoryChooser.getInitialDirectory().listFiles()) {
+            try {
+                if (Files.probeContentType(f.toPath()).startsWith("image"))
+                    images.add(f);
+            } catch (NullPointerException e) {
+            } catch (IOException e) {
+            }
+        }
         imageList.setItems(images);
     }
 
     private void initInteraction() {
 
         imageList.getSelectionModel().selectedItemProperty().addListener(
-                prop -> loadImage(imageView,
-                        new Image("file:\\" + imageList.getSelectionModel().getSelectedItem().getPath()),
-                        200, 200)
+                prop -> {
+                    if (imageList.getSelectionModel().getSelectedItem() == null)
+                        label.setVisible(true);
+                    else
+                        loadImage(imageView,
+                                new Image("file:\\" + imageList.getSelectionModel().getSelectedItem().getPath()),
+                                200, 200);
+                }
         );
 
         browse.setOnAction(
                 a -> {
-                    directory = directoryChooser.showDialog(new Stage());
-                    pathToDirectory.setText(directory.getPath());
-                    System.out.println(directory);
+                    directoryChooser.setInitialDirectory(directoryChooser.showDialog(new Stage()));
+                    pathToDirectory.setText(directoryChooser.getInitialDirectory().getPath());
                     initData();
                 }
         );
@@ -73,7 +86,7 @@ public class ImageLibrary extends Application {
                         super.updateItem(item, empty);
                         if (empty) {
                             setGraphic(null);
-                            setText("");
+                            setText("нет изображений");
                         } else {
                             setGraphic(loadImage(new ImageView(),
                                     new Image("file:\\" + item.toPath()),
@@ -85,14 +98,21 @@ public class ImageLibrary extends Application {
         );
 
         directoryChooser = new DirectoryChooser();
-        directory = new File("C:\\Users\\braid\\Pictures\\iCloud Photos\\Downloads");
+        directoryChooser.setInitialDirectory(new File("C:\\Users\\braid\\Pictures\\iCloud Photos\\Downloads"));
 
         browse = new Button("Обзор");
-        pathToDirectory = new TextField(directory.getPath());
+        pathToDirectory = new TextField(directoryChooser.getInitialDirectory().getPath());
         pathToDirectory.setEditable(false);
+
         HBox hb1 = new HBox(pathToDirectory, browse);
+
         imageView = new ImageView();
-        VBox vb1 = new VBox(hb1, imageView);
+        label = new Label("Выберите картинку");
+        label.setVisible(false);
+
+        StackPane stackPane = new StackPane(imageView, label);
+
+        VBox vb1 = new VBox(hb1, stackPane);
 
         return new SplitPane(imageList, vb1);
     }
