@@ -1,14 +1,17 @@
 package JavaFX;
 
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
@@ -26,6 +29,8 @@ public class ImageLibrary extends Application {
     private Button browse;
     private TextField pathToDirectory;
     private Label label;
+    private ObservableList<File> images;
+    private StackPane stackPane;
 
     @Override
     public void start(Stage primaryStage) {
@@ -40,13 +45,21 @@ public class ImageLibrary extends Application {
     }
 
     private void initData() {
-        ObservableList<File> images = FXCollections.observableArrayList();
-        for (File f : directoryChooser.getInitialDirectory().listFiles()) {
+        images = FXCollections.observableArrayList();
+        File[] files = directoryChooser.getInitialDirectory().listFiles();
+        if (files == null) {
+//            System.out.println("Failed to find files in a directory");
+            //TODO show message dialog or show info inside the list
+            return;
+        }
+
+        for (File f : files) {
             try {
-                if (Files.probeContentType(f.toPath()).startsWith("image"))
+                String contentType = Files.probeContentType(f.toPath());
+                if (contentType != null && contentType.startsWith("image"))
                     images.add(f);
-            } catch (NullPointerException e) {
             } catch (IOException e) {
+                //do nothing
             }
         }
         imageList.setItems(images);
@@ -56,12 +69,15 @@ public class ImageLibrary extends Application {
 
         imageList.getSelectionModel().selectedItemProperty().addListener(
                 prop -> {
-                    if (imageList.getSelectionModel().getSelectedItem() == null)
+                    if (imageList.getSelectionModel().isEmpty()) {
+                        imageView.setImage(null);
                         label.setVisible(true);
-                    else
+                    } else {
                         loadImage(imageView,
                                 new Image("file:\\" + imageList.getSelectionModel().getSelectedItem().getPath()),
                                 200, 200);
+                        label.setVisible(false);
+                    }
                 }
         );
 
@@ -70,7 +86,16 @@ public class ImageLibrary extends Application {
                     directoryChooser.setInitialDirectory(directoryChooser.showDialog(new Stage()));
                     pathToDirectory.setText(directoryChooser.getInitialDirectory().getPath());
                     initData();
+                    if (images.isEmpty())
+                        imageList.setPlaceholder(new Label("нет изображений"));
                 }
+        );
+
+        stackPane.prefHeightProperty().bind(
+                Bindings.createDoubleBinding(
+                        () -> imageList.getHeight(),
+                        imageList.heightProperty()
+                )
         );
 
     }
@@ -86,7 +111,7 @@ public class ImageLibrary extends Application {
                         super.updateItem(item, empty);
                         if (empty) {
                             setGraphic(null);
-                            setText("нет изображений");
+                            setText("");
                         } else {
                             setGraphic(loadImage(new ImageView(),
                                     new Image("file:\\" + item.toPath()),
@@ -103,14 +128,14 @@ public class ImageLibrary extends Application {
         browse = new Button("Обзор");
         pathToDirectory = new TextField(directoryChooser.getInitialDirectory().getPath());
         pathToDirectory.setEditable(false);
+        HBox.setHgrow(pathToDirectory, Priority.ALWAYS);
 
         HBox hb1 = new HBox(pathToDirectory, browse);
 
         imageView = new ImageView();
-        label = new Label("Выберите картинку");
-        label.setVisible(false);
+        label = new Label("Выберите изображение");
 
-        StackPane stackPane = new StackPane(imageView, label);
+        stackPane = new StackPane(imageView, label);
 
         VBox vb1 = new VBox(hb1, stackPane);
 
