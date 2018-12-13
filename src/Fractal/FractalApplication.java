@@ -3,29 +3,30 @@ package Fractal;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class FractalApplication extends Application {
 
-    private Button moveRight;
-    private Button moveLeft;
     private double dx;
-    private double xo;
-    private double yo;
+    private double x0;
+    private double y0;
     private int width;
     private int height;
     private ImageView imageView;
-    private Button moveDown;
-    private Button moveUp;
+    private double tmpX;
+    private double tmpY;
+    private double distX;
+    private double distY;
 
     @Override
     public void start(Stage primaryStage) {
@@ -39,30 +40,20 @@ public class FractalApplication extends Application {
     }
 
     private void initInteraction() {
-        moveRight.setOnAction(
-                a -> {
-                    xo += dx * width / 4;
-                    imageView.setImage(drawFractal());
-                }
-        );
 
-        moveLeft.setOnAction(
+        imageView.addEventHandler(
+                ScrollEvent.SCROLL,
                 a -> {
-                    xo -= dx * width / 4;
-                    imageView.setImage(drawFractal());
-                }
-        );
+                    double scroll = a.getDeltaY();
+                    double oldDx = dx;
+                    if (scroll < 0)
+                        dx *= 1.5;
+                    else
+                        dx /= 1.5;
 
-        moveDown.setOnAction(
-                a -> {
-                    yo -= dx * height / 4;
-                    imageView.setImage(drawFractal());
-                }
-        );
+                    x0 += width * (oldDx - dx) / 2;
+                    y0 -= height * (oldDx - dx) / 2;
 
-        moveUp.setOnAction(
-                a -> {
-                    yo += dx * height / 4;
                     imageView.setImage(drawFractal());
                 }
         );
@@ -70,14 +61,38 @@ public class FractalApplication extends Application {
         imageView.addEventHandler(
                 MouseEvent.MOUSE_DRAGGED,
                 a -> {
-                    xo += a.getSceneX() / 600;
-                    yo += a.getSceneY() / 600;
+                    imageView.setX(a.getSceneX() - distX);
+                    imageView.setY(a.getSceneY() - distY);
+                }
+        );
+
+        imageView.addEventHandler(
+                MouseEvent.MOUSE_PRESSED,
+                a -> {
+                    tmpX = a.getSceneX();
+                    tmpY = a.getSceneY();
+                    distX = tmpX - imageView.getX();
+                    distY = tmpY - imageView.getY();
+                }
+        );
+
+        imageView.addEventHandler(
+                MouseEvent.MOUSE_RELEASED,
+                a -> {
+                    x0 += -(a.getSceneX() - tmpX) * dx;
+                    y0 += (a.getSceneY() - tmpY) * dx;
                     imageView.setImage(drawFractal());
+                    imageView.setX(0);
+                    imageView.setY(0);
                 }
         );
     }
 
     private WritableImage drawFractal() {
+
+        if (height == 0 || width == 0)
+            return null;
+
         Fractal fractal = new Mandelbrot();
         Palette palette = new HSBPalette();
         WritableImage writableImage = new WritableImage(width, height);
@@ -85,8 +100,8 @@ public class FractalApplication extends Application {
 
         for (int i = 0; i < width - 1; i++) {
             for (int j = 0; j < height - 1; j++) {
-                double x = xo + i * dx;
-                double y = yo - j * dx;
+                double x = x0 + i * dx;
+                double y = y0 - j * dx;
                 double colorIndex = fractal.getColor(x, y);
                 Color color = palette.getColor(colorIndex);
                 pixelWriter.setColor(i, j, color);
@@ -99,16 +114,14 @@ public class FractalApplication extends Application {
         width = 600;
         height = 600;
         dx = 0.1 / 600;
-        xo = -0.3;
-        yo = 0.8;
+        x0 = -0.3;
+        y0 = 0.8;
 
-
-        moveRight = new Button("→");
-        moveLeft = new Button("←");
-        moveUp = new Button("↑");
-        moveDown = new Button("↓");
         imageView = new ImageView(drawFractal());
-        return new Pane(new VBox(imageView, new HBox(moveLeft, moveRight, moveUp, moveDown)));
+        VBox.setVgrow(imageView, Priority.ALWAYS);
+        HBox.setHgrow(imageView, Priority.ALWAYS);
+
+        return new Pane(imageView);
     }
 
     /*
