@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
@@ -20,13 +21,16 @@ public class FractalApplication extends Application {
     private double dx;
     private double x0;
     private double y0;
-    private int width;
-    private int height;
+    private int imgWidth;
+    private int imgHeight;
     private ImageView imageView;
     private double tmpX;
     private double tmpY;
     private double distX;
     private double distY;
+    private Pane pane;
+    private WritableImage prevImg;
+    private int temp;
 
     @Override
     public void start(Stage primaryStage) {
@@ -51,10 +55,10 @@ public class FractalApplication extends Application {
                     else
                         dx /= 1.5;
 
-                    x0 += width * (oldDx - dx) / 2;
-                    y0 -= height * (oldDx - dx) / 2;
+                    x0 += imgWidth * (oldDx - dx) / 2;
+                    y0 -= imgHeight * (oldDx - dx) / 2;
 
-                    imageView.setImage(drawFractal());
+                    imageView.setImage(drawFractal(imgWidth, imgHeight, 0, 0));
                 }
         );
 
@@ -81,14 +85,36 @@ public class FractalApplication extends Application {
                 a -> {
                     x0 += -(a.getSceneX() - tmpX) * dx;
                     y0 += (a.getSceneY() - tmpY) * dx;
-                    imageView.setImage(drawFractal());
+                    imageView.setImage(drawFractal(imgWidth, imgHeight, 0, 0));
                     imageView.setX(0);
                     imageView.setY(0);
                 }
         );
+
+        pane.heightProperty().addListener(
+                prop -> {
+                    if (imgHeight < pane.getHeight()) {
+                        int sy = imgHeight;
+                        temp = (int) pane.getHeight() - imgHeight;
+                        imgHeight = (int) pane.getHeight();
+                        imageView.setImage(drawFractal(imgWidth, imgHeight, 0, sy));
+                    }
+                }
+        );
+
+        pane.widthProperty().addListener(
+                prop -> {
+                    if (imgWidth < pane.getWidth()) {
+                        int sx = imgWidth;
+                        temp = (int) pane.getWidth() - imgWidth;
+                        imgWidth = (int) pane.getWidth();
+                        imageView.setImage(drawFractal(imgWidth, imgHeight, sx, 0));
+                    }
+                }
+        );
     }
 
-    private WritableImage drawFractal() {
+    private WritableImage drawFractal(int width, int height, int sx, int sy) {
 
         if (height == 0 || width == 0)
             return null;
@@ -98,8 +124,8 @@ public class FractalApplication extends Application {
         WritableImage writableImage = new WritableImage(width, height);
         PixelWriter pixelWriter = writableImage.getPixelWriter();
 
-        for (int i = 0; i < width - 1; i++) {
-            for (int j = 0; j < height - 1; j++) {
+        for (int i = sx; i < width; i++) {
+            for (int j = sy; j < height; j++) {
                 double x = x0 + i * dx;
                 double y = y0 - j * dx;
                 double colorIndex = fractal.getColor(x, y);
@@ -107,21 +133,35 @@ public class FractalApplication extends Application {
                 pixelWriter.setColor(i, j, color);
             }
         }
+
+        if (sx > 0 || sy > 0) {
+            PixelReader pr = prevImg.getPixelReader();
+
+            for (int i = 0; i < Math.max(sx, width - temp); i++) {
+                for (int j = 0; j < Math.max(sy, height - temp); j++) {
+                    pixelWriter.setColor(i, j, pr.getColor(i, j));
+                }
+            }
+        }
+
+        prevImg = writableImage;
         return writableImage;
     }
 
     private Parent initInterface() {
-        width = 600;
-        height = 600;
+        imgWidth = 600;
+        imgHeight = 600;
         dx = 0.1 / 600;
         x0 = -0.3;
         y0 = 0.8;
 
-        imageView = new ImageView(drawFractal());
+        imageView = new ImageView(drawFractal(imgWidth, imgHeight, 0, 0));
         VBox.setVgrow(imageView, Priority.ALWAYS);
         HBox.setHgrow(imageView, Priority.ALWAYS);
 
-        return new Pane(imageView);
+        pane = new Pane(imageView);
+
+        return pane;
     }
 
     /*
